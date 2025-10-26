@@ -8,6 +8,7 @@ This is a fork of MetaAudio, a GoldSrc plugin that adds OpenAL support to its so
 Thus we now have HRTF and surround sound back to our beloved GoldSrc games, and, as this plugin hooks directly into the engine, most mods should work with the new system.
 
 Working games and mods:
+
 - Half-Life
 - Half-Life: Opposing Force
 - Half-Life: Blue Shift
@@ -15,7 +16,18 @@ Working games and mods:
 - Natural-Selection
 - Counter-Strike
 - Counter-Strike: Condition Zero
+- SvEngine (Sven Co-op has it's own sound engine integrated in the client dll, so theoretically MetaAudio won't affect anything unless you install some third-party mods into SvEngine)
+
 ... and possibly more!
+
+Working engine:
+
+- GoldSrc 3266
+- GoldSrc 4554
+- GoldSrc 6153
+- GoldSrc 8684 (Pre-25th)
+- GoldSrc 10240 (HL25th)
+- SvEngine 10257
 
 # What works
 - Sound positioning
@@ -51,39 +63,33 @@ Working games and mods:
 - al_maxsends (sets the max number of simultaneous EFX effects, MetaAudio uses a maximum of 2 but this can limit it to less)
 - al_device (sets the OpenAL device to use, can be _OpenAL Soft_ or _OpenAL Soft on Realtek_, for example)
 
-# Manual Installation
+# Installation
 
-Copy the "metahook" folder to your mod dir.
+1. Install latest version of [MetaHookSv](https://github.com/hzqst/MetaHookSv) .
 
-Copy the other files to Steam's Half-Life dir.
+2. Copy the `metahook` folder to your existing `metahook` dir.
 
 Example folder structure, where <game> can be "valve", "cstrike", "ns", "gearbox" or any other mod:
+
 ```
 |%STEAM%\steamapps\common\Half-Life\
-|----> metahook.exe
-|----> sndfile.dll
-|----> OpenAL32.dll (remove to use X-Fi hardware acceleration)
+|----> metahook.exe (metahook_blob.exe, svencoop.exe)
 |----> <game>\
   |----> metahook\
     |----> plugins\
       |----> MetaAudio.dll
+    |----> dlls\
+      |----> sndfile.dll
+      |----> OpenAL32.dll (OpenAL software implemention, remove to use pre-installed hardware acceleration version of OpenAL from system)
     |----> configs\
       |----> plugins.lst
 ```
-One should load the game through "MetaHook.exe". It is recommended to create a shortcut with at least the following launch options:
-"-steam -insecure -game <game>". There are two sample shorcut files included, "OpenAL Half-Life" and "OpenAL Natural-Selection".
 
-There should be an "MetaAudio.dll" entry in "plugins.lst".
+3. Add a new entry `MetaAudio.dll` in the `plugins.lst`.
 
-# One Click Installation
+* One should start the game through "MetaHook.exe". It is recommended to create a shortcut with at least the following launch options：`-steam -insecure -game <game>`.
 
-1. You have to compile the MetaAudio by yourself before installation. see Compiling
-
-2. Run `install-to-(WhateverGameYouWant).bat`
-
-3. Launch game from shortcut `MetaHook for (WhateverGameYouWant)`
-
-* You should have your Steam running otherwise the [SteamAppsLocation](SteamAppsLocation/README.md) will probably not going to find GameInstallDir.
+* You will have to install the hardware acceleration version of OpenAL from https://www.openal.org/ if you removed the software implemention one from `dlls\`.
 
 # Known bugs
 
@@ -96,7 +102,7 @@ There should be an "MetaAudio.dll" entry in "plugins.lst".
 
 # Build Requirements
 
-1. [Visual Studio 2017 / 2019 / 2022, with vc141 / vc142 / vc143 toolset](https://visualstudio.microsoft.com/)
+1. [Visual Studio 2022, with vc143 toolset](https://visualstudio.microsoft.com/)
 
 2. [CMake](https://cmake.org/download/)
 
@@ -104,26 +110,23 @@ There should be an "MetaAudio.dll" entry in "plugins.lst".
 
 # Compiling
 
-1. Run `build-initdeps.bat`, wait until all required submodules / dependencies are pulled. (this may takes couple of minutes, depending on your network connection and download speed)
+1. `git clone --recursive <repoUrl>`, where `<repoUrl>` should be the MetaAudio repository URL.
 
-2. Run `build-MetaAudio.bat`, wail until all binary files generated.
-
-(legacy) ~~Just load the MetaHook solution, set your post-build event to your desired folder and compile normally with Visual Studio.
-Tested with MSVC 2019. Remember to install C++ CRT.~~
-
-The include Alure2 has a slight different API than upstream, therefore must be compiled together.
+2. Run `scripts\build-MetaAudio-x86-Release.bat`
 
 # Debugging
 
-1. Run `build-initdeps.bat`, wait until all required submodules / dependencies are pulled. (this may takes couple of minutes, depending on your network connection and download speed)
+1. `git clone --recursive <repoUrl>`, where `<repoUrl>` should be the MetaAudio repository URL.
 
-2. Run `debug-(WhateverGameYouWant).bat`, depends on which you are going to debug with
+2. Run `externals\MetaHookSv\scripts\debug-<GameName>.bat`, where `<GameName>` should be the game you are going to debug with.
 
-3. Open MetaHook.sln with Visual Studio IDE, set specified project as launch project, compile the project, then press F5 to start debugging.
+3. Run `scripts\build-MetaAudio-x86-Debug.bat`
+
+4. Open `build\x86\Debug\MetaAudio.sln` with Visual Studio IDE, set `MetaAudio` as launch project, press F5 to start debugging.
 
 * Other games follow the same instruction.
 
-* You should restart Visual Studio IDE to apply changes to debugging profile, if Visual Studio IDE was running.
+* You should restart Visual Studio IDE to apply changes to debugging profile, if Visual Studio IDE was running at the 2nd step.
 
 # Credits
 
