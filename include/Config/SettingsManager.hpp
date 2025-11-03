@@ -1,7 +1,10 @@
 #pragma once
 
+#include <metahook.h>
+
 #include "Enums/XFiWorkaround.hpp"
 #include "Enums/OccluderType.hpp"
+#include "Enums/ClampingMode.hpp"
 
 namespace MetaAudio
 {
@@ -9,6 +12,10 @@ namespace MetaAudio
     {
     public:
         void Init(const cl_enginefunc_t& engFuncs);
+
+        bool ResampleAll();
+
+        ClampingMode OnResamplerClipping();
 
         bool NoSound();
 
@@ -29,6 +36,8 @@ namespace MetaAudio
 
         XFiWorkaround XfiWorkaround();
     };
+
+    const int SOXR_SAMPLE_RATE = 48000;
 }
 
 #ifndef _METAAUDIO_SETTINGS_MANAGER_

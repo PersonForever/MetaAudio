@@ -49,8 +49,11 @@ set(SOURCES
     src/Loaders/GoldSrcFileStream.cpp
     src/Loaders/GoldSrcFileFactory.cpp
     src/Loaders/SoundLoader.cpp
+    src/Loaders/SoxrDecoder.cpp
+    src/Loaders/SoxrBitDepthNormalizerDecoder.cpp
     src/AudioEngine.cpp
     src/Utilities/ChannelManager.cpp
+    src/Utilities/SoxrResamplerHelper.cpp
     src/snd_local.cpp
     src/SoundSources/SoundSourceFactory.cpp
     src/SoundSources/BaseSoundSource.cpp
@@ -91,6 +94,7 @@ target_include_directories(MetaAudio
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/externals/picojson
         ${PROJECT_SOURCE_DIR}/externals/steamaudio/include
+        ${PROJECT_SOURCE_DIR}/externals/soxr/src
         ${PROJECT_SOURCE_DIR}/externals/alure/include/AL
         ${PROJECT_SOURCE_DIR}/externals/MetaHookSv/include
         ${PROJECT_SOURCE_DIR}/externals/MetaHookSv/include/Interface
@@ -116,6 +120,12 @@ option(ALSOFT_INSTALL_EXAMPLES "Install example programs" OFF)
 
 # Add OpenAL-Soft as subdirectory
 add_subdirectory(externals/openal-soft)
+
+# This fixes OpenAL not found for alure2 in some cases
+export(TARGETS OpenAL
+    NAMESPACE OpenAL::
+    FILE "${CMAKE_BINARY_DIR}/OpenALConfig.cmake"
+)
 
 # Set OpenAL variables for Alure's find_package to succeed
 # openal-soft creates a target 'OpenAL' that we can reference
@@ -241,6 +251,12 @@ if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
     target_compile_options(MetaAudio PUBLIC "/Zc:__cplusplus")
 endif()
 
+option(BUILD_TESTS OFF)
+option(WITH_LSR_BINDINGS OFF)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/Externals/soxr/cmake/Modules)
+add_subdirectory(externals/soxr)
+
 # Ensure proper build order dependencies
 # FLAC and Vorbis depend on Ogg
 add_dependencies(FLAC ogg)
@@ -254,7 +270,7 @@ add_dependencies(${ALURE2_LIBRARY} OpenAL sndfile)
 # MetaAudio depends on Alure
 add_dependencies(MetaAudio ${ALURE2_LIBRARY})
 
-target_link_libraries(MetaAudio PRIVATE OpenAL ${ALURE2_LIBRARY} sndfile)
+target_link_libraries(MetaAudio PRIVATE OpenAL ${ALURE2_LIBRARY} sndfile soxr)
 
 # Ensure all libraries use the same MSVC runtime library as MetaAudio
 if(MSVC)

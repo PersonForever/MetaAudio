@@ -1,6 +1,7 @@
 #include <metahook.h>
 
 #include "Loaders/LocalAudioDecoder.hpp"
+#include "Config/SettingsManager.hpp"
 
 namespace MetaAudio
 {
@@ -27,6 +28,14 @@ namespace MetaAudio
     info.looping = dec->hasLoopPoints();
     info.loopstart = loop_points.first;
     info.loopend = loop_points.second;
+
+    // The decoder `dec` was not created with the resampled audio data, so we need to workaround this
+    if (settings.ResampleAll() && info.looping)
+    {
+      auto ratio = SOXR_SAMPLE_RATE / dec->getFrequency();
+      info.loopstart *= ratio;
+      info.loopend *= ratio;
+    }
 
     data_output.swap(audioData.data);
     m_data.erase(full_path);
